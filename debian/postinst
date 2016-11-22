@@ -1,6 +1,6 @@
 #! /bin/sh -e
 
-# reload udev service?
-# ...
+# Add udev rule to running service
+/usr/sbin/service udev reload
 
 #DEBHELPER#

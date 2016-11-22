@@ -1,4 +1,4 @@
 #!/usr/bin/dh-exec
-udev/99-tempsensor.rules => /lib/udev/rules.d/
-munin/temper_ => /usr/share/munin/plugins/
+udev/99-tempsensor.rules => /lib/udev/rules.d/99-tempsensor.rules
+munin/temper_ => /usr/share/munin/plugins/temper_
 pcsensor => /usr/bin/pcsensor
