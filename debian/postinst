@@ -1,0 +1,6 @@
+#! /bin/sh -e
+
+# reload udev service?
+# ...
+
+#DEBHELPER#
