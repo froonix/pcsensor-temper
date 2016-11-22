@@ -1,0 +1,12 @@
+Subject: Change group in udev rule
+Description: Set group of device to "input". This is distribution-specific, so it's better included in a patch.
+Origin: https://github.com/stefansundin/pcsensor-temper/commit/8465fdafbae7a9506446b7c9cd7a28c8c93400ab#diff-51a68ef18667479ca049f37fb7c99f0d
+Author: Stefan Sundin <https://github.com/stefansundin>
+Reviewed-by: Christian Schrötter <cs@fnx.li>
+Last-Update: 2016-11-22
+Forwarded: not-needed
+--- a/udev/99-tempsensor.rules
++++ b/udev/99-tempsensor.rules
+@@ -1 +1 @@
+-SUBSYSTEMS=="usb", ACTION=="add", ATTRS{idVendor}=="0c45", ATTRS{idProduct}=="7401", MODE="666"
++SUBSYSTEMS=="usb", ACTION=="add", ATTRS{idVendor}=="0c45", ATTRS{idProduct}=="7401", GROUP="input", MODE="0666"
