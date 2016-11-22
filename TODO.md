@@ -6,6 +6,4 @@ WIP! UNTESTED! DON'T USE THIS FORK ATM!
 * Finish work on debian package.
 * Link to binary froonix repository for debian packages (wiki?)
 
-```
-libusb-dev
-```
+* Move munin plugin to subpackage?
