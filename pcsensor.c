@@ -133,7 +133,6 @@ usb_dev_handle* setup_libusb_access(int devicenum)
 	usb_detach(lvr_winusb, INTERFACE1);
 	usb_detach(lvr_winusb, INTERFACE2);
 
-	// stefansundin
 	if(usb_reset(lvr_winusb) != 0)
 	{
 		printf("Could not reset device.\n");
@@ -319,10 +318,6 @@ void interrupt_read_temperature(usb_dev_handle *dev, float *tempC)
 		printf("\n");
 	}
 
-	/***
-	 * Original code does not properly support negative temperatures (below 0 deg C), instead returning values around 240-255.
-	 * Source of this patch: https://github.com/bubbafix/pcsensor-temper/commit/8f33df1c8b0a314a69770fb647594cb71372992c
-	 ***/
 	// temperature = (answer[3] & 0xFF) + (answer[2] << 8);
 	temperature = (answer[3] & 0xFF) + ((signed char) answer[2] << 8);
 	temperature += calibration;
@@ -389,6 +384,7 @@ int main( int argc, char **argv)
 {
 	usb_dev_handle *lvr_winusb = NULL;
 	float tempc;
+	float tempf;
 	int c;
 	struct tm *local;
 	time_t t;
@@ -509,19 +505,17 @@ int main( int argc, char **argv)
 	{
 		control_transfer(lvr_winusb, uTemp);
 		interrupt_read_temperature(lvr_winusb, &tempc);
+		tempf = 9.0 / 5.0 * tempc + 32.0;
 
 		t = time(NULL);
 		local = localtime(&t);
-
-		// move fahrenheit calculation HERE
-		// ...
 
 		if(mrtg)
 		{
 			if(format == 2)
 			{
-				printf("%.2f\n", (9.0 / 5.0 * tempc + 32.0));
-				printf("%.2f\n", (9.0 / 5.0 * tempc + 32.0));
+				printf("%.2f\n", tempf);
+				printf("%.2f\n", tempf);
 			}
 			else
 			{
@@ -536,7 +530,7 @@ int main( int argc, char **argv)
 		{
 			if(format == 2)
 			{
-				printf("%.2f\n", (9.0 / 5.0 * tempc + 32.0));
+				printf("%.2f\n", tempf);
 			}
 			else if(format == 1)
 			{
@@ -554,7 +548,7 @@ int main( int argc, char **argv)
 
 			if(format == 2)
 			{
-				printf("Temperature %.2fF\n", (9.0 / 5.0 * tempc + 32.0));
+				printf("Temperature %.2fF\n", tempf);
 			}
 			else if(format == 1)
 			{
@@ -562,7 +556,7 @@ int main( int argc, char **argv)
 			}
 			else
 			{
-				printf("Temperature %.2fF %.2fC\n", (9.0 / 5.0 * tempc + 32.0), tempc);
+				printf("Temperature %.2fF %.2fC\n", tempf, tempc);
 			}
 		}
 
