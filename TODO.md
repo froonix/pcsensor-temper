@@ -10,6 +10,6 @@ WIP! UNTESTED! DON'T USE THIS FORK ATM!
 
 Include other contributions: (partly)
 
-	* https://github.com/bubbafix/pcsensor-temper/commit/8f33df1c8b0a314a69770fb647594cb71372992c
-	* https://github.com/matt-garman/pcsensor-temper/commit/fd5aa1f1ecd385741912691509b39960d022d235
-	* https://github.com/stefansundin/pcsensor-temper/commit/8465fdafbae7a9506446b7c9cd7a28c8c93400ab
+* https://github.com/bubbafix/pcsensor-temper/commit/8f33df1c8b0a314a69770fb647594cb71372992c
+* https://github.com/matt-garman/pcsensor-temper/commit/fd5aa1f1ecd385741912691509b39960d022d235
+* https://github.com/stefansundin/pcsensor-temper/commit/8465fdafbae7a9506446b7c9cd7a28c8c93400ab
