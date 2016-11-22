@@ -1,45 +1,51 @@
 /*
- * pcsensor.c by Philipp Adelt (c) 2012 (info@philipp.adelt.net)
- * based on Juan Carlos Perez (c) 2011 (cray@isp-sl.com)
- * based on Temper.c by Robert Kavaler (c) 2009 (relavak.com)
- * All rights reserved.
+ * PCSENSOR-TEMPER
  *
- * Temper driver for linux. This program can be compiled either as a library
- * or as a standalone program (-DUNIT_TEST). The driver will work with some
- * TEMPer usb devices from RDing (www.PCsensor.com).
+ * Temper driver for linux. This program can be compiled either as a
+ * library or as a standalone program (-DUNIT_TEST). The driver will
+ * work with some TEMPer usb devices from RDing (www.PCsensor.com).
  *
  * This driver works with USB devices presenting ID 0c45:7401.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
+ * ---------------------------------------------------------------------
  *
- * THIS SOFTWARE IS PROVIDED BY Philipp Adelt (and other contributors) ''AS IS'' AND ANY
- * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL Philipp Adelt (or other contributors) BE LIABLE FOR ANY
- * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2016, Christian Schrötter <cs@fnx.li>
+ * Copyright (c) 2012, Philipp Adelt <info@philipp.adelt.net>
+ * Copyright (c) 2011, Juan Carlos Perez <cray@isp-sl.com>
+ * Copyright (c) 2009, Robert Kavaler <relavak.com>
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+ * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+ * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
+ * WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
  */
-
-
 
 #include <usb.h>
 #include <stdio.h>
 #include <time.h>
-
 #include <string.h>
 #include <errno.h>
 #include <signal.h>
+#include <ctype.h>
 
-
-#define VERSION "1.0.0"
+#define VERSION "1.1.0"
 
 #define VENDOR_ID  0x0c45
 #define PRODUCT_ID 0x7401
@@ -47,25 +53,25 @@
 #define INTERFACE1 0x00
 #define INTERFACE2 0x01
 
-const static int reqIntLen=8;
-const static int reqBulkLen=8;
-const static int endpoint_Int_in=0x82; /* endpoint 0x81 address for IN */
-const static int endpoint_Int_out=0x00; /* endpoint 1 address for OUT */
-const static int endpoint_Bulk_in=0x82; /* endpoint 0x81 address for IN */
-const static int endpoint_Bulk_out=0x00; /* endpoint 1 address for OUT */
-const static int timeout=5000; /* timeout in ms */
+const static int reqIntLen  = 8;
+const static int reqBulkLen = 8;
 
-const static char uTemperatura[] = { 0x01, 0x80, 0x33, 0x01, 0x00, 0x00, 0x00, 0x00 };
+const static int timeout           = 5000; /* timeout in ms                */
+const static int endpoint_Int_in   = 0x82; /* endpoint 0x81 address for IN */
+const static int endpoint_Int_out  = 0x00; /* endpoint 1 address for OUT   */
+const static int endpoint_Bulk_in  = 0x82; /* endpoint 0x81 address for IN */
+const static int endpoint_Bulk_out = 0x00; /* endpoint 1 address for OUT   */
+
+const static char uTemp[] = { 0x01, 0x80, 0x33, 0x01, 0x00, 0x00, 0x00, 0x00 };
 const static char uIni1[] = { 0x01, 0x82, 0x77, 0x01, 0x00, 0x00, 0x00, 0x00 };
 const static char uIni2[] = { 0x01, 0x86, 0xff, 0x01, 0x00, 0x00, 0x00, 0x00 };
 
-static int bsalir=1;
-static int debug=0;
-static int seconds=5;
-static int formato=0;
-static int mrtg=0;
-static int calibration=0;
-
+static int bsalir      = 1;
+static int debug       = 0;
+static int seconds     = 5;
+static int format      = 0;
+static int mrtg        = 0;
+static int calibration = 0;
 
 void bad(const char *why)
 {
@@ -126,6 +132,13 @@ usb_dev_handle* setup_libusb_access(int devicenum)
 
 	usb_detach(lvr_winusb, INTERFACE1);
 	usb_detach(lvr_winusb, INTERFACE2);
+
+	// stefansundin
+	if(usb_reset(lvr_winusb) != 0)
+	{
+		printf("Could not reset device.\n");
+		return NULL;
+	}
 
 	if(usb_set_configuration(lvr_winusb, 0x01) < 0)
 	{
@@ -284,7 +297,7 @@ void interrupt_read(usb_dev_handle *dev)
 	}
 }
 
-void interrupt_read_temperatura(usb_dev_handle *dev, float *tempC)
+void interrupt_read_temperature(usb_dev_handle *dev, float *tempC)
 {
 	int r, i, temperature;
 	unsigned char answer[reqIntLen];
@@ -306,10 +319,14 @@ void interrupt_read_temperatura(usb_dev_handle *dev, float *tempC)
 		printf("\n");
 	}
 
-	temperature = (answer[3] & 0xFF) + (answer[2] << 8);
+	/***
+	 * Original code does not properly support negative temperatures (below 0 deg C), instead returning values around 240-255.
+	 * Source of this patch: https://github.com/bubbafix/pcsensor-temper/commit/8f33df1c8b0a314a69770fb647594cb71372992c
+	 ***/
+	// temperature = (answer[3] & 0xFF) + (answer[2] << 8);
+	temperature = (answer[3] & 0xFF) + ((signed char) answer[2] << 8);
 	temperature += calibration;
 	*tempC = temperature * (125.0 / 32000.0);
-
 }
 
 void bulk_transfer(usb_dev_handle *dev)
@@ -347,6 +364,27 @@ void ex_program(int sig)
 	(void) signal(SIGINT, SIG_DFL);
 }
 
+void usage(const char* progname)
+{
+	printf(
+		"pcsensor version %s\n"
+		"USAGE: %s [options] <arguments>\n"
+		"  ARGUMENTS:\n"
+		"  OPTIONS:\n"
+		"    -h help\n"
+		"    -v verbose\n"
+		"    -n[i] use device number i (0 is the first one found on the bus)\n"
+		"    -l[n] loop every 'n' seconds, default value is 5\n"
+		"    -c output only in Celsius\n"
+		"    -f output only in Fahrenheit\n"
+		"    -a[n] increase or decrease temperature in 'n' degrees for device calibration\n"
+		"    -m output for mrtg integration\n"
+		"    -o output only the temperature value\n"
+			, VERSION
+			, progname
+	);
+}
+
 int main( int argc, char **argv)
 {
 	usb_dev_handle *lvr_winusb = NULL;
@@ -355,8 +393,9 @@ int main( int argc, char **argv)
 	struct tm *local;
 	time_t t;
 	int devicenum = 0;
+	int plain = 0;
 
-	while((c = getopt (argc, argv, "mfcvhn:l::a:")) != -1)
+	while((c = getopt(argc, argv, "mfcvhpn:l::a:")) != -1)
 	{
 		switch (c)
 		{
@@ -377,16 +416,21 @@ int main( int argc, char **argv)
 
 			case 'c':
 				//Celsius
-				formato = 1;
+				format = 1;
 				break;
 
 			case 'f':
 				//Fahrenheit
-				formato = 2;
+				format = 2;
 				break;
 
 			case 'm':
 				mrtg = 1;
+				break;
+
+			case 'p':
+				// raw output mode
+				plain = 1;
 				break;
 
 			case 'l':
@@ -419,20 +463,11 @@ int main( int argc, char **argv)
 
 			case '?':
 			case 'h':
-				printf("pcsensor version %s\n", VERSION);
-				printf("      Aviable options:\n");
-				printf("          -h help\n");
-				printf("          -v verbose\n");
-				printf("          -n[i] use device number i (0 is the first one found on the bus)\n");
-				printf("          -l[n] loop every 'n' seconds, default value is 5s\n");
-				printf("          -c output only in Celsius\n");
-				printf("          -f output only in Fahrenheit\n");
-				printf("          -a[n] increase or decrease temperature in 'n' degrees for device calibration\n");
-				printf("          -m output for mrtg integration\n");
+				usage(argv[0]);
 				exit(EXIT_FAILURE);
 
 			default:
-				if(isprint (optopt))
+				if(isprint(optopt))
 				{
 					fprintf (stderr, "Unknown option `-%c'.\n", optopt);
 				}
@@ -460,7 +495,7 @@ int main( int argc, char **argv)
 
 	ini_control_transfer(lvr_winusb);
 
-	control_transfer(lvr_winusb, uTemperatura );
+	control_transfer(lvr_winusb, uTemp );
 	interrupt_read(lvr_winusb);
 
 	control_transfer(lvr_winusb, uIni1 );
@@ -472,15 +507,18 @@ int main( int argc, char **argv)
 
 	do
 	{
-		control_transfer(lvr_winusb, uTemperatura);
-		interrupt_read_temperatura(lvr_winusb, &tempc);
+		control_transfer(lvr_winusb, uTemp);
+		interrupt_read_temperature(lvr_winusb, &tempc);
 
 		t = time(NULL);
 		local = localtime(&t);
 
+		// move fahrenheit calculation HERE
+		// ...
+
 		if(mrtg)
 		{
-			if(formato == 2)
+			if(format == 2)
 			{
 				printf("%.2f\n", (9.0 / 5.0 * tempc + 32.0));
 				printf("%.2f\n", (9.0 / 5.0 * tempc + 32.0));
@@ -494,15 +532,31 @@ int main( int argc, char **argv)
 			printf("%02d:%02d\n", local->tm_hour, local->tm_min);
 			printf("pcsensor\n");
 		}
+		else if(plain)
+		{
+			if(format == 2)
+			{
+				printf("%.2f\n", (9.0 / 5.0 * tempc + 32.0));
+			}
+			else if(format == 1)
+			{
+				printf("%.2f\n", tempc);
+			}
+			else
+			{
+				fprintf(stderr, "Please use -c/-f.\n");
+				exit(EXIT_FAILURE);
+			}
+		}
 		else
 		{
 			printf("%04d/%02d/%02d %02d:%02d:%02d ", local->tm_year +1900, local->tm_mon + 1, local->tm_mday, local->tm_hour, local->tm_min, local->tm_sec);
 
-			if(formato == 2)
+			if(format == 2)
 			{
 				printf("Temperature %.2fF\n", (9.0 / 5.0 * tempc + 32.0));
 			}
-			else if(formato == 1)
+			else if(format == 1)
 			{
 				printf("Temperature %.2fC\n", tempc);
 			}
