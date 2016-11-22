@@ -339,7 +339,8 @@ void bulk_transfer(usb_dev_handle *dev)
 	r = usb_bulk_read(dev, endpoint_Bulk_in, answer, reqBulkLen, timeout);
 	if(r != reqBulkLen)
 	{
-		perror("USB bulk read"); bad("USB read failed");
+		perror("USB bulk read");
+		bad("USB read failed");
 	}
 
 	if(debug)
