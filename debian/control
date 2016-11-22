@@ -1,0 +1,13 @@
+Source: pcsensor-temper
+Section: adopt
+Priority: extra
+Maintainer: Christian Schrötter <cs@fnx.li>
+Build-Depends: debhelper (>= 9), libusb-dev, dh-exec
+Standards-Version: 3.9.5
+Homepage: https://github.com/froonix/pcsensor-temper
+
+Package: pcsensor-temper
+Architecture: any
+Multi-Arch: foreign
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Description: ...

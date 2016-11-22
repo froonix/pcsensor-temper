@@ -1,0 +1,5 @@
+pcsensor-temper (1.1.0+alpha1) testing; urgency=medium
+
+  * First test build for debian.
+
+ -- Christian Schrötter <cs@fnx.li>  Mon, 21 Nov 2016 20:00:00 +0200
