@@ -1,0 +1,36 @@
+#!/bin/bash
+
+# Temperatur Überwachung mittels Temper USB-Stick und pcsensor/pcsensor-plain.
+# TODO: ID als Pluginname ermöglichen -> temper_1, temper_2, temper_3, ...
+# TODO: Kalibrationswert in Konfiguration auslagern! Sehr wichtig!
+# TODO: Ortsname für Grafik in Konfiguration auslagern!
+# TODO: C/F Umschalter als Konfiguration.
+# TODO: Host konfigurierbar machen.
+
+TEMPER_HOST="bedroom"
+TEMPER_LOCATION="Bedroom"
+#TEMPER_CALIBRATION=-640
+TEMPER_CALIBRATION=-512
+TEMPER_DEVICE=0
+
+. $MUNIN_LIBDIR/plugins/plugin.sh
+
+if [ "$1" = "autoconf" ]; then
+	echo no
+	exit 0
+fi
+
+
+if [ "$1" = "config" ]; then
+		
+		echo 'host_name '$TEMPER_HOST
+        echo 'graph_title Temperature ('$TEMPER_LOCATION')'
+        echo 'graph_vlabel C'
+        echo 'graph_info This graph shows the temperature for '$TEMPER_LOCATION'.'
+        echo 'graph_category sensors'
+        echo 'temp.label Temperature'
+        exit 0
+fi
+
+echo -n 'temp.value '
+/usr/local/bin/pcsensor-plain -n$TEMPER_DEVICE -c -a$TEMPER_CALIBRATION
