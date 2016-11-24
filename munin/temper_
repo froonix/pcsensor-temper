@@ -43,23 +43,34 @@ then
 		echo "host_name $HOSTNAME"
 	fi
 
-	if [[ "$LOCATION" != "" ]]
-	then
-		echo "graph_title Temperature (${LOCATION})"
-		echo "graph_info This graph shows the temperature for location ${LOCATION}."
-	else
-		echo "graph_title Temperature"
-		echo "graph_info This graph shows the temperature."
-	fi
-
 	if [[ "$UNIT" == "F" ]]
 	then
 		echo "temp.cdef temp,1.8,*,32,+"
+		unitname="Fahrenheit"
+	else
+		unitname="Celsius"
 	fi
 
-	echo "graph_vlabel $UNIT"
-	echo 'graph_category sensors'
-	echo 'temp.label Temperature'
+	if [[ "$LOCATION" != "" ]]
+	then
+		echo "graph_title Temperature (${LOCATION})"
+		echo "graph_info This graph shows the temperature for location ${LOCATION} in degree ${unitname}."
+	else
+		echo "graph_title Temperature"
+		echo "graph_info This graph shows the temperature in degree ${unitname}."
+	fi
+
+	#echo "graph_vlabel $UNIT" # <-- no °
+	echo "graph_vlabel degree $unitname"
+
+	echo "graph_category sensors"
+	echo "temp.label Temperature"
+
+	if [[ "$CALIBRATION" != "0" ]]
+	then
+		echo "temp.info current calibration: $CALIBRATION"
+	fi
+
 	exit
 fi
 
