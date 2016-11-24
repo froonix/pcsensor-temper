@@ -1,5 +1,5 @@
 Source: pcsensor-temper
-Section: adopt
+Section: fnx
 Priority: extra
 Maintainer: Christian Schrötter <cs@fnx.li>
 Build-Depends: debhelper (>= 9), libusb-dev, dh-exec

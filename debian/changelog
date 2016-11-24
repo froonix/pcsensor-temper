@@ -1,5 +1,5 @@
-pcsensor-temper (1.1.0-1) experimental; urgency=medium
+pcsensor-temper (1.1.0-2) stable; urgency=medium
 
-  * First test build for Debian Jessie.
+  * First build for Debian Jessie.
 
- -- Christian Schrötter <cs@fnx.li>  Thu, 24 Nov 2016 15:55:15 +0100
+ -- Christian Schrötter <cs@fnx.li>  Thu, 24 Nov 2016 17:26:10 +0100
