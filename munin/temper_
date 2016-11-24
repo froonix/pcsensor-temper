@@ -1,36 +1,67 @@
 #!/bin/bash
+########################################################################
+#                                                                      #
+# temper_ temperature plugin for munin.                                #
+# Part of "pcsensor-temper" package.                                   #
+#                                                                      #
+########################################################################
+#                                                                      #
+# Example plugin config:                                               #
+#                                                                      #
+#   [temper_*]                                                         #
+#     env.HOSTNAME    <...>                                            #
+#     env.LOCATION    <...>                                            #
+#     env.CALIBRATION <INT>                                            #
+#     env.UNIT        <C/F>                                            #
+#                                                                      #
+########################################################################
 
-# Temperatur Überwachung mittels Temper USB-Stick und pcsensor/pcsensor-plain.
-# TODO: ID als Pluginname ermöglichen -> temper_1, temper_2, temper_3, ...
-# TODO: Kalibrationswert in Konfiguration auslagern! Sehr wichtig!
-# TODO: Ortsname für Grafik in Konfiguration auslagern!
-# TODO: C/F Umschalter als Konfiguration.
-# TODO: Host konfigurierbar machen.
+set -euf -o pipefail
 
-TEMPER_HOST="bedroom"
-TEMPER_LOCATION="Bedroom"
-#TEMPER_CALIBRATION=-640
-TEMPER_CALIBRATION=-512
-TEMPER_DEVICE=0
+HOSTNAME=${HOSTNAME:-}
+LOCATION=${LOCATION:-}
+CALIBRATION=${CALIBRATION:-0}
+UNIT=${UNIT:-}; UNIT=${UNIT^^}
 
-. $MUNIN_LIBDIR/plugins/plugin.sh
+basename=`basename "$0"`
+file=`basename "$(readlink -f "$0")"`
+c="${#file}"; DEVICE="${basename:c}"
+mode=${1:-}; unset basename file c
 
-if [ "$1" = "autoconf" ]; then
-	echo no
-	exit 0
+# . $MUNIN_LIBDIR/plugins/plugin.sh
+if [[ "$UNIT" != "F" ]]; then UNIT=C; fi
+if [[ "$DEVICE" == "" ]]; then DEVICE=0; fi
+
+if [ "$mode" = "autoconf" ]
+then
+	echo "no"
+	exit
+elif [[ "$mode" = "config" ]]
+then
+	if [[ "$HOSTNAME" != "" ]]
+	then
+		echo "host_name $HOSTNAME"
+	fi
+
+	if [[ "$LOCATION" != "" ]]
+	then
+		echo "graph_title Temperature (${LOCATION})"
+		echo "graph_info This graph shows the temperature for location ${LOCATION}."
+	else
+		echo "graph_title Temperature"
+		echo "graph_info This graph shows the temperature."
+	fi
+
+	if [[ "$UNIT" == "F" ]]
+	then
+		echo "temp.cdef temp,1.8,*,32,+"
+	fi
+
+	echo "graph_vlabel $UNIT"
+	echo 'graph_category sensors'
+	echo 'temp.label Temperature'
+	exit
 fi
 
-
-if [ "$1" = "config" ]; then
-		
-		echo 'host_name '$TEMPER_HOST
-        echo 'graph_title Temperature ('$TEMPER_LOCATION')'
-        echo 'graph_vlabel C'
-        echo 'graph_info This graph shows the temperature for '$TEMPER_LOCATION'.'
-        echo 'graph_category sensors'
-        echo 'temp.label Temperature'
-        exit 0
-fi
-
-echo -n 'temp.value '
-/usr/local/bin/pcsensor-plain -n$TEMPER_DEVICE -c -a$TEMPER_CALIBRATION
+echo -n 'temp.value ' # todo: error handling?
+pcsensor -n "$DEVICE" -a "$CALIBRATION" -p -c
