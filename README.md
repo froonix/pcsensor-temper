@@ -14,7 +14,7 @@ make all
 Please take a look at the [wiki](https://github.com/froonix/pcsensor-temper/wiki/Binary-Debian-Packages).
 
 ## Supported and tested devices
-`ID 0c45:7401 Microdia` ([M-ware ID7747](http://amzn.to/2fUFUXM))
+* `ID 0c45:7401 Microdia` ([M-ware ID7747](http://amzn.to/2fUFUXM))
 
 ## See also
 * [Source of this fork](https://github.com/padelt/pcsensor-temper)
