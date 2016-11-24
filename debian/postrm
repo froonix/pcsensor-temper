@@ -1,6 +1,6 @@
 #! /bin/sh -e
 
 # Remove udev rule from running service
-/usr/sbin/service reload udev
+/usr/sbin/service udev reload
 
 #DEBHELPER#
