@@ -133,7 +133,7 @@ usb_dev_handle* setup_libusb_access(int devicenum)
 	usb_detach(lvr_winusb, INTERFACE1);
 	usb_detach(lvr_winusb, INTERFACE2);
 
-	if(usb_reset(lvr_winusb) != 0)
+	if(usb_reset(lvr_winusb) != 0 /*&& debug*/)
 	{
 		printf("Could not reset device.\n");
 		return NULL;
@@ -177,7 +177,7 @@ usb_dev_handle *find_lvr_winusb(int devicenum)
 					printf("lvr_winusb with Vendor Id: %x and Product Id: %x found.\n", VENDOR_ID, PRODUCT_ID);
 				}
 
-				if (!(handle = usb_open(dev)))
+				if(!(handle = usb_open(dev)))
 				{
 					printf("Could not open USB device\n");
 					return NULL;
