@@ -11,4 +11,4 @@ Architecture: any
 Multi-Arch: foreign
 Depends: ${misc:Depends}, ${shlibs:Depends}
 Suggests: munin-node
-Description: ...
+Description: USB temperature sensor support for 0c45:7401.
