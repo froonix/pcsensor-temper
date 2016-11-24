@@ -10,4 +10,5 @@ Package: pcsensor-temper
 Architecture: any
 Multi-Arch: foreign
 Depends: ${misc:Depends}, ${shlibs:Depends}
+Suggests: munin-node
 Description: ...
