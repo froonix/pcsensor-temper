@@ -10,8 +10,11 @@ package builds.
 ```bash
 sudo apt install git build-essential libusb-dev
 git clone "https://github.com/froonix/pcsensor-temper.git"
-cd "pcsensor-temper"
-make all
+cd "pcsensor-temper" && make all
+
+# copy udev rule (udev directory)
+# copy program (pcsensor file)
+# ...
 ```
 ## Binary packages (experimental)
 Please take a look at the [wiki](https://github.com/froonix/pcsensor-temper/wiki/Binary-Debian-Packages).
