@@ -45,7 +45,7 @@
 #include <signal.h>
 #include <ctype.h>
 
-#define VERSION "1.1.0"
+#define VERSION "1.1.1"
 
 #define VENDOR_ID  0x0c45
 #define PRODUCT_ID 0x7401
@@ -375,7 +375,7 @@ void usage(const char* progname)
 		"    -f output only in Fahrenheit\n"
 		"    -a[n] increase or decrease temperature in 'n' degrees for device calibration\n"
 		"    -m output for mrtg integration\n"
-		"    -o output only the temperature value\n"
+		"    -p output only the temperature value\n"
 			, VERSION
 			, progname
 	);
