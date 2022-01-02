@@ -1,3 +1,6 @@
+# UPDATE – REPOSITORY ARCHIVED
+There's a much better alternative available: [temper-python](https://github.com/padelt/temper-python)
+
 # pcsensor-temper
 Simple C-program to query temperature from TEMPer-USB-devices. There's a
 Munin plugin included too. This repository is prepared for Debian
